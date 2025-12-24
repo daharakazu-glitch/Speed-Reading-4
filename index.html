@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Reading 4: Cremona Violins</title>
+    
+    <!-- エラーハンドリング -->
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            console.error('Global Error:', msg, error);
+            return false;
+        };
+    </script>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            font-family: "Times New Roman", Times, serif;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel" data-presets="env,react">
+        // --- Icons ---
+        const Icons = {
+            Volume2: ({ className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            ),
+            Mic: ({ className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+            ),
+            Check: ({ className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20 6 9 17 4 12"></polyline></svg>
+            ),
+            RotateCcw: ({ className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+            ),
+            Globe: ({ className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            ),
+            HelpCircle: ({ className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            ),
+            GripVertical: ({ className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>
+            ),
+            Settings: ({ className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            )
+        };
+
+        // --- Data: 速読4 (Cremona Violins) ---
+
+        const STORY_DATA = [
+            {
+                id: 'intro',
+                title: 'Introduction (1)',
+                sentences: [
+                    { id: 'i1', en: "Most musicians agree that the violins made in Cremona, Italy, about 200 years ago are the best in the world.", jp: "ほとんどの音楽家が、今から約200年前にイタリアのクレモナで作られたバイオリンが世界最高であるということに意見が一致している。" },
+                    { id: 'i2', en: "These violins sound better than any others. They even sound better than the best violins made today.", jp: "これらのバイオリンは、ほかのどのバイオリンよりもよい音を出す。今日作られた最高のバイオリンよりさえよい音を出す。" },
+                    { id: 'i3', en: "Violin makers and scientists are trying to make instruments like the Italian violins. But they aren't the same.", jp: "バイオリン製作者や科学者は、そのイタリアのバイオリンのような楽器を作ろうと努力しているが、同じようにはできない。" },
+                    { id: 'i4', en: "Musicians still prefer the old ones. Why are these old Italian violins so special?", jp: "音楽家たちは未だにその古いバイオリンのほうを好んでいる。なぜこの古いイタリアのバイオリンはそんなにも特別なのだろうか。" }
+                ]
+            },
+            {
+                id: 'C',
+                title: 'Part C',
+                sentences: [
+                    { id: 'c1', en: "Some people think the answer is the age of the violins.", jp: "答えはバイオリンの古さにあるのだと考えている人々もいる。" },
+                    { id: 'c2', en: "They say that today's violins will also sound wonderful someday.", jp: "彼らは、今日のバイオリンもやがてはすばらしい音を出すようになると言っている。" },
+                    { id: 'c3', en: "But not all old violins sound wonderful. Only the old violins from Cremona are special.", jp: "ところが、古いバイオリンのすべてがすばらしい音を出すわけではないのだ。クレモナの古いバイオリンだけが特別なのである。" }
+                ]
+            },
+            {
+                id: 'B',
+                title: 'Part B',
+                sentences: [
+                    { id: 'b1', en: "Other people think the secret to those violins is the wood. But the kind of wood may not be so important.", jp: "それらのバイオリンの秘密は木材にあると考えている人々もいる。が、木材の種類はそれほど重要なものではないかもしれない。" },
+                    { id: 'b2', en: "It may be more important to cut the wood a special way. Wood for a violin must be cut very carefully.", jp: "木材を特別な方法で切るほうがもっと重要かもしれないのだ。バイオリンを作るための木材はきわめて注意深く裁断する必要がある。" },
+                    { id: 'b3', en: "It has to be the right size and shape. Even the smallest difference will change the sound of the violin.", jp: "正確な大きさと形にならなければならない。ほんのちょっとした違いでさえ、バイオリンの音を変えてしまうのだ。" },
+                    { id: 'b4', en: "Maybe the Italians understood more than we do now about how to cut the wood.", jp: "ひょっとすると、イタリア人たちは木材の切り方について現在の私たちよりも多くのことを理解していたのかもしれない。" }
+                ]
+            },
+            {
+                id: 'A',
+                title: 'Part A',
+                sentences: [
+                    { id: 'a1', en: "Size and shape may not be the answer either.", jp: "大きさや形も答えとはならないかもしれない。" },
+                    { id: 'a2', en: "Scientists have measured these old violins very carefully.", jp: "科学者たちはこれらの古いバイオリンを寸分たがわず測定している。" },
+                    { id: 'a3', en: "They can make new ones that are exactly the same size and shape as the Cremona violins.", jp: "彼らはクレモナのバイオリンとまったく同じ大きさと形の新しいバイオリンを作ることができる。" },
+                    { id: 'a4', en: "But the new violins still do not sound as good as the old ones.", jp: "ところが、それでもこの新しいバイオリンは古いバイオリンほどはよい音を出さないのである。" }
+                ]
+            },
+            {
+                id: 'conclusion',
+                title: 'Conclusion (5)',
+                sentences: [
+                    { id: 'co1', en: "The secret may be lost forever. Young musicians today hope this is not true.", jp: "その秘密は、永久に失われたものなのかもしれない。今日の若い音楽家たちはそうでないことを願っている。" },
+                    { id: 'co2', en: "They need fine violins. But there aren't very many of the old violins left.", jp: "彼らはすばらしいバイオリンを必要としているのだが、古いバイオリンはあまり多くは残っていない。" },
+                    { id: 'co3', en: "Also, the old violins are very expensive. Recently, a famous old Italian violin was sold for about $300,000!", jp: "加えて、その古いバイオリンはきわめて高価である。最近、ある有名なイタリアの古いバイオリンが売られた。なんとおよそ30万ドルであった。" }
+                ]
+            }
+        ];
+
+        // Ordering Logic: PDF Answer is 1 -> C -> B -> A -> 5
+        const ORDERING_ITEMS = [
+            { id: 'A', content: "Size and shape may not be the answer either. Scientists have measured these old violins very carefully..." },
+            { id: 'B', content: "Other people think the secret to those violins is the wood. But the kind of wood may not be so important..." },
+            { id: 'C', content: "Some people think the answer is the age of the violins. They say that today's violins will also sound wonderful someday..." }
+        ];
+
+        // --- Helper Functions ---
+
+        const calculateSimilarity = (str1, str2) => {
+            if (!str1 || !str2) return 0;
+            const normalize = (s) => s.toLowerCase().replace(/[^\w\s]/g, '').trim();
+            const s1 = normalize(str1).split(/\s+/);
+            const s2 = normalize(str2).split(/\s+/);
+            
+            const intersection = s1.filter(word => s2.includes(word));
+            const score = Math.round((intersection.length / Math.max(s1.length, s2.length)) * 100);
+            return Math.min(100, Math.max(0, score));
+        };
+
+        // --- Components ---
+
+        const TabButton = ({ active, onClick, children }) => (
+            <button
+                onClick={onClick}
+                className={`px-8 py-4 rounded-t-xl font-bold text-xl transition-colors ${
+                active 
+                    ? 'bg-blue-600 text-white shadow-lg z-10' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+            >
+                {children}
+            </button>
+        );
+
+        // --- Ordering Quiz Component ---
+        function OrderingQuiz() {
+            const [items, setItems] = React.useState(ORDERING_ITEMS);
+            const [isCorrect, setIsCorrect] = React.useState(null);
+            
+            const introText = STORY_DATA.find(s => s.id === 'intro')?.sentences.map(s => s.en).join(' ');
+            const conclusionText = STORY_DATA.find(s => s.id === 'conclusion')?.sentences.map(s => s.en).join(' ');
+
+            const handleDragStart = (e, index) => {
+                e.dataTransfer.setData('text/plain', index.toString());
+            };
+
+            const handleDragOver = (e) => {
+                e.preventDefault();
+            };
+
+            const handleDrop = (e, dropIndex) => {
+                e.preventDefault();
+                const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                if (dragIndex === dropIndex) return;
+                if (isNaN(dragIndex)) return;
+
+                const newItems = [...items];
+                const [draggedItem] = newItems.splice(dragIndex, 1);
+                newItems.splice(dropIndex, 0, draggedItem);
+                
+                setItems(newItems);
+                setIsCorrect(null);
+            };
+
+            const checkOrder = () => {
+                const currentOrderIds = items.map(item => item.id).join('');
+                // PDF Answer: C -> B -> A
+                if (currentOrderIds === 'CBA') { 
+                    setIsCorrect(true);
+                } else {
+                    setIsCorrect(false);
+                }
+            };
+
+            return (
+                <div className="space-y-10 animate-fade-in">
+                    <div className="bg-white p-10 rounded-2xl shadow-sm border border-gray-200">
+                        <h2 className="text-3xl font-bold mb-8 flex items-center gap-3">
+                            <Icons.HelpCircle className="w-8 h-8 text-blue-500" />
+                            Question 1: Reorder the paragraphs
+                        </h2>
+                        <p className="text-2xl text-gray-700 mb-10 leading-relaxed">
+                            The story begins with part 1 and ends with part 5. <br/>
+                            Drag and drop <span className="font-bold text-blue-600">A</span>, <span className="font-bold text-blue-600">B</span>, and <span className="font-bold text-blue-600">C</span> to complete the story.
+                        </p>
+
+                        {/* Static Intro */}
+                        <div className="bg-gray-100 p-8 rounded-xl border-l-8 border-blue-400 mb-8">
+                            <span className="font-bold text-blue-800 text-2xl block mb-3">1 (Start)</span>
+                            <p className="text-2xl leading-loose text-gray-900">{introText}</p>
+                        </div>
+
+                        {/* Draggable Area */}
+                        <div className="space-y-6 pl-4 md:pl-10 border-l-4 border-dashed border-gray-300 py-6">
+                            {items.map((item, index) => (
+                                <div
+                                    key={item.id}
+                                    draggable
+                                    onDragStart={(e) => handleDragStart(e, index)}
+                                    onDragOver={handleDragOver}
+                                    onDrop={(e) => handleDrop(e, index)}
+                                    className="flex items-start gap-6 p-6 bg-white border-2 border-gray-200 rounded-xl cursor-move hover:border-blue-400 hover:shadow-lg transition-all active:cursor-grabbing group"
+                                >
+                                    <div className="flex flex-col items-center justify-center pt-2 text-gray-400 group-hover:text-blue-500">
+                                        <Icons.GripVertical className="w-8 h-8" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <span className="inline-block px-4 py-2 mb-3 text-lg font-bold text-white bg-blue-500 rounded-lg">
+                                            {item.id}
+                                        </span>
+                                        <p className="text-2xl text-gray-900 leading-loose">{item.content}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Static Conclusion */}
+                        <div className="bg-gray-100 p-8 rounded-xl border-l-8 border-blue-400 mt-8">
+                            <span className="font-bold text-blue-800 text-2xl block mb-3">5 (End)</span>
+                            <p className="text-2xl leading-loose text-gray-900">{conclusionText}</p>
+                        </div>
+
+                        <div className="mt-12 flex items-center gap-8">
+                            <button
+                                onClick={checkOrder}
+                                className="flex items-center gap-3 px-10 py-5 bg-blue-600 text-white text-xl rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg active:transform active:scale-95"
+                            >
+                                Check Order
+                            </button>
+                            
+                            {isCorrect === true && (
+                                <div className="flex items-center gap-3 text-green-600 font-bold text-2xl animate-pulse">
+                                    <Icons.Check className="w-10 h-10" />
+                                    Correct! (1 → C → B → A → 5)
+                                </div>
+                            )}
+                            {isCorrect === false && (
+                                <div className="flex items-center gap-3 text-red-500 font-bold text-2xl">
+                                    <Icons.RotateCcw className="w-8 h-8" />
+                                    Try again. Review the arguments: Age (C) -> Wood/Cut (B) -> Size/Shape (A).
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- Comprehension Quiz Component ---
+        function ComprehensionQuiz() {
+            const [selectedOption, setSelectedOption] = React.useState(null);
+            const [submitted, setSubmitted] = React.useState(false);
+
+            // Generated options based on the text
+            const options = [
+                { id: 1, text: "How to Make a Modern Violin" },
+                { id: 2, text: "The Secret of Cremona Violins" },
+                { id: 3, text: "Expensive Instruments in Italy" },
+                { id: 4, text: "The Life of Italian Musicians" }
+            ];
+
+            const handleSubmit = () => {
+                if (selectedOption !== null) {
+                    setSubmitted(true);
+                }
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
+                    <div className="bg-white p-10 rounded-2xl shadow-sm border border-gray-200">
+                        <h2 className="text-3xl font-bold mb-8 flex items-center gap-3">
+                            <Icons.HelpCircle className="w-8 h-8 text-blue-500" />
+                            Question 2: Title Selection
+                        </h2>
+                        <p className="text-2xl text-gray-700 mb-10 leading-relaxed">Choose the best title for this story.</p>
+
+                        <div className="space-y-6">
+                            {options.map((option) => (
+                                <button
+                                    key={option.id}
+                                    onClick={() => {
+                                        if (!submitted) setSelectedOption(option.id);
+                                    }}
+                                    className={`w-full text-left p-8 rounded-xl border-2 transition-all ${
+                                        submitted
+                                        ? option.id === 2
+                                            ? 'border-green-500 bg-green-50'
+                                            : selectedOption === option.id
+                                            ? 'border-red-500 bg-red-50'
+                                            : 'border-gray-100 opacity-50'
+                                        : selectedOption === option.id
+                                            ? 'border-blue-500 bg-blue-50'
+                                            : 'border-gray-200 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-6">
+                                        <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                                            submitted && option.id === 2 ? 'border-green-500 bg-green-500 text-white' : 
+                                            selectedOption === option.id ? 'border-blue-500' : 'border-gray-300'
+                                        }`}>
+                                            {submitted && option.id === 2 && <Icons.Check className="w-6 h-6" />}
+                                            {!submitted && selectedOption === option.id && <div className="w-5 h-5 rounded-full bg-blue-500" />}
+                                        </div>
+                                        <span className={`text-2xl ${
+                                            submitted && option.id === 2 ? 'font-bold text-green-900' : 'text-gray-900'
+                                        }`}>{option.text}</span>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+
+                        {!submitted && (
+                            <button
+                                onClick={handleSubmit}
+                                disabled={selectedOption === null}
+                                className="mt-12 w-full py-5 bg-blue-600 text-white text-xl rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
+                            >
+                                Submit Answer
+                            </button>
+                        )}
+
+                        {submitted && (
+                            <div className="mt-10 p-8 bg-green-50 rounded-xl border border-green-200 animate-fade-in">
+                                <h3 className="font-bold text-green-900 text-2xl mb-3">Explanation</h3>
+                                <p className="text-green-800 text-xl leading-relaxed mb-6">
+                                    Correct! The text explores various theories (age, wood, size/shape) about why old Cremona violins sound so special, making "The Secret of Cremona Violins" the most appropriate title.
+                                </p>
+                                <p className="text-green-800 text-lg leading-relaxed border-t border-green-200 pt-4">
+                                    <strong>解説：</strong><br/>
+                                    正解です！ この文章は、なぜ古いクレモナのバイオリンが特別な音を出すのかについて、古さ、木材、形などの観点から考察しているため、「The Secret of Cremona Violins（クレモナのバイオリンの秘密）」が最も適切なタイトルです。
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // --- Reading Practice Component ---
+        
+        function PracticeCard({ sentence, showTranslation, voice }) {
+            const [isRecording, setIsRecording] = React.useState(false);
+            const [score, setScore] = React.useState(null);
+            const [recognizedText, setRecognizedText] = React.useState('');
+            const recognitionRef = React.useRef(null);
+
+            const playAudio = () => {
+                const utterance = new SpeechSynthesisUtterance(sentence.en);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                
+                // ユーザーが選択したボイスを使用
+                if (voice) {
+                    utterance.voice = voice;
+                    utterance.lang = voice.lang;
+                }
+
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            };
+
+            const toggleRecording = () => {
+                if (isRecording) {
+                    if (recognitionRef.current) {
+                        recognitionRef.current.stop();
+                    }
+                    setIsRecording(false);
+                } else {
+                    startRecording();
+                }
+            };
+
+            const startRecording = () => {
+                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                    console.warn("Speech recognition not supported");
+                    return;
+                }
+
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognitionRef.current = new SpeechRecognition();
+                recognitionRef.current.lang = 'en-US';
+                recognitionRef.current.continuous = false;
+                recognitionRef.current.interimResults = false;
+
+                recognitionRef.current.onstart = () => {
+                    setIsRecording(true);
+                    setScore(null);
+                    setRecognizedText('');
+                };
+
+                recognitionRef.current.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    setRecognizedText(transcript);
+                    const calculatedScore = calculateSimilarity(sentence.en, transcript);
+                    setScore(calculatedScore);
+                    setIsRecording(false);
+                };
+
+                recognitionRef.current.onerror = (event) => {
+                    console.error(event.error);
+                    setIsRecording(false);
+                };
+
+                recognitionRef.current.onend = () => {
+                    setIsRecording(false);
+                };
+
+                recognitionRef.current.start();
+            };
+
+            return (
+                <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-shadow">
+                    <div className="flex flex-col md:flex-row gap-8">
+                        <div className="flex-1 space-y-4">
+                            <p className="text-3xl text-gray-900 leading-loose font-medium">
+                                {sentence.en}
+                            </p>
+                            
+                            <div className={`overflow-hidden transition-all duration-300 ${showTranslation ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0'}`}>
+                                <p className="text-xl text-gray-600 border-l-4 border-gray-300 pl-5 py-2 mt-4 leading-relaxed">
+                                    {sentence.jp}
+                                </p>
+                            </div>
+
+                            {score !== null && (
+                                <div className={`mt-6 p-6 rounded-xl text-lg ${score > 80 ? 'bg-green-50 text-green-800' : 'bg-orange-50 text-orange-800'}`}>
+                                    <div className="flex items-center gap-4 mb-2">
+                                        <span className="font-bold text-2xl">Score: {score}/100</span>
+                                        <span className="text-xl opacity-85">
+                                            {score > 80 ? "Great job!" : "Keep practicing!"}
+                                        </span>
+                                    </div>
+                                    <p className="text-lg italic opacity-90">You said: "{recognizedText}"</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex md:flex-col gap-4 flex-shrink-0 pt-2 justify-center md:justify-start">
+                            <button
+                                onClick={playAudio}
+                                className="p-5 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors shadow-sm"
+                                title="Listen"
+                            >
+                                <Icons.Volume2 className="w-10 h-10" />
+                            </button>
+                            
+                            <button
+                                onClick={toggleRecording}
+                                className={`p-5 rounded-full transition-all shadow-sm ${
+                                    isRecording 
+                                        ? 'bg-red-100 text-red-600 animate-pulse ring-4 ring-red-200' 
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                                title={isRecording ? "Stop Recording" : "Start Recording"}
+                            >
+                                <Icons.Mic className="w-10 h-10" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function ReadingPractice() {
+            const [showTranslation, setShowTranslation] = React.useState(true);
+            const [availableVoices, setAvailableVoices] = React.useState([]);
+            const [selectedVoice, setSelectedVoice] = React.useState(null);
+
+            React.useEffect(() => {
+                const loadVoices = () => {
+                    const voices = window.speechSynthesis.getVoices();
+                    // Filter for English voices and some key quality voices
+                    const englishVoices = voices.filter(voice => 
+                        voice.lang.startsWith('en-')
+                    );
+                    
+                    // Prioritize certain voices for the initial selection
+                    const preferredVoice = englishVoices.find(voice => 
+                        voice.name === 'Google US English' || 
+                        (voice.name.includes('Google') && voice.lang === 'en-US')
+                    );
+
+                    setAvailableVoices(englishVoices);
+                    if (englishVoices.length > 0 && !selectedVoice) {
+                        setSelectedVoice(preferredVoice || englishVoices[0]);
+                    }
+                };
+
+                loadVoices();
+                
+                // Chrome loads voices asynchronously
+                if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                    window.speechSynthesis.onvoiceschanged = loadVoices;
+                }
+            }, []);
+            
+            return (
+                <div className="space-y-10 animate-fade-in">
+                    <div className="flex flex-col md:flex-row justify-between items-center bg-white p-8 rounded-2xl shadow-sm border border-gray-200 sticky top-0 z-10 gap-4">
+                        <h2 className="text-3xl font-bold text-gray-900">Practice & Recording</h2>
+                        
+                        <div className="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
+                            {/* Voice Selection */}
+                            <div className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-xl border border-gray-200 w-full md:w-auto">
+                                <Icons.Settings className="w-5 h-5 text-gray-500" />
+                                <select 
+                                    className="bg-transparent border-none text-gray-700 text-lg focus:ring-0 w-full md:w-64"
+                                    onChange={(e) => {
+                                        const voice = availableVoices.find(v => v.name === e.target.value);
+                                        setSelectedVoice(voice);
+                                    }}
+                                    value={selectedVoice ? selectedVoice.name : ''}
+                                >
+                                    {availableVoices.length === 0 && <option>Loading voices...</option>}
+                                    {availableVoices.map(voice => (
+                                        <option key={voice.name} value={voice.name}>
+                                            {voice.name} ({voice.lang})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <button
+                                onClick={() => setShowTranslation(!showTranslation)}
+                                className="flex items-center gap-3 px-8 py-4 text-xl font-bold text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 transition-colors w-full md:w-auto justify-center"
+                            >
+                                <Icons.Globe className="w-6 h-6" />
+                                {showTranslation ? 'Hide Translation' : 'Show Translation'}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-12 pb-16">
+                        {STORY_DATA.map((section) => (
+                            <div key={section.id} className="space-y-8">
+                                {section.id !== 'intro' && section.id !== 'conclusion' && (
+                                    <div className="flex items-center gap-6 my-10">
+                                        <div className="h-px bg-gray-300 flex-1"></div>
+                                        <span className="text-xl font-bold text-gray-500 uppercase tracking-widest">{section.title}</span>
+                                        <div className="h-px bg-gray-300 flex-1"></div>
+                                    </div>
+                                )}
+                                
+                                {section.sentences.map((sentence) => (
+                                    <PracticeCard 
+                                        key={sentence.id} 
+                                        sentence={sentence} 
+                                        showTranslation={showTranslation}
+                                        voice={selectedVoice}
+                                    />
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // --- Main App Component ---
+
+        function App() {
+            const [activeTab, setActiveTab] = React.useState('sort');
+
+            return (
+                <div className="min-h-screen p-4 md:p-8 max-w-7xl mx-auto">
+                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden min-h-[700px] flex flex-col">
+                        <header className="bg-blue-600 text-white p-8">
+                            <h1 className="text-4xl font-bold tracking-wide">English Speed Reading: Cremona Violins</h1>
+                            <p className="text-blue-100 mt-3 text-2xl">2025 Winter Course - Speed Reading 4</p>
+                        </header>
+
+                        <div className="flex border-b border-gray-200 px-8 pt-6 gap-3 bg-white overflow-x-auto">
+                            <TabButton active={activeTab === 'sort'} onClick={() => setActiveTab('sort')}>
+                                1. Ordering
+                            </TabButton>
+                            <TabButton active={activeTab === 'quiz'} onClick={() => setActiveTab('quiz')}>
+                                2. Comprehension
+                            </TabButton>
+                            <TabButton active={activeTab === 'read'} onClick={() => setActiveTab('read')}>
+                                3. Reading Practice
+                            </TabButton>
+                        </div>
+
+                        <main className="flex-1 p-10 bg-gray-50">
+                            {activeTab === 'sort' && <OrderingQuiz />}
+                            {activeTab === 'quiz' && <ComprehensionQuiz />}
+                            {activeTab === 'read' && <ReadingPractice />}
+                        </main>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- Mount ---
+        const init = () => {
+            const rootEl = document.getElementById('root');
+            if (rootEl) {
+                try {
+                    if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
+                        throw new Error("React library failed to load.");
+                    }
+                    const root = ReactDOM.createRoot(rootEl);
+                    root.render(<App />);
+                } catch (e) {
+                    console.error("Rendering Error:", e);
+                    rootEl.innerHTML = '<div style="color:red;padding:20px;"><h2>Application Error</h2><p>' + e.message + '</p></div>';
+                }
+            } else {
+                console.error('Root element not found');
+            }
+        };
+
+        if (document.readyState === 'complete') {
+            init();
+        } else {
+            window.addEventListener('load', init);
+        }
+    </script>
+</body>
+</html>
